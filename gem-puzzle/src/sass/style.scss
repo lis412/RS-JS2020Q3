@@ -1,0 +1,16 @@
+.field {
+  width: 400px;
+  height: 400px;
+  border: 1px solid black;
+  border-radius: 10px;
+  position: relative;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  border: 2px solid blue;
+  border-radius: 10px;
+  box-sizing: border-box;
+  position: absolute;
+}
