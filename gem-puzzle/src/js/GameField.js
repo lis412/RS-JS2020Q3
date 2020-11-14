@@ -1,10 +1,10 @@
 import Cell from './Cell';
-// import { CELL_SIZE } from './Const';
-import create from './utils/create';
-import isPuzzleSolvable from './utils/isPuzzleSolvable';
-import shuffle from './utils/shuffle';
+import * as tools from './utils/index';
+// import create from './utils/create';
+// import isPuzzleSolvable from './utils/isPuzzleSolvable';
+// import shuffle from './utils/shuffle';
 
-const main = create('main', '', [create('h1', 'title', 'Puzzle game')]);
+const main = tools.create('main', '', [tools.create('h1', 'title', 'Puzzle game')]);
 
 export default class GameField {
   constructor() {
@@ -12,52 +12,68 @@ export default class GameField {
       col: 0,
       row: 0,
     };
-    this.stepCount = 0;
   }
 
   init(size) {
-    this.cells = [];
     this.size = size;
+    this.stepCount = 0;
     // create markdown
-    this.field = create('div', 'field', null, main);
-    this.stepField = create('div', 'step', `${this.stepCount}`);
+    tools.create('button', 'btn', 'Reset', main).addEventListener('click', () => { this.generateCells(); });
+    this.field = tools.create('div', 'field', null, main);
+    this.stepField = tools.create('div', 'step', `${this.stepCount}`);
 
-    create('div', 'score', [
-      create('span', '', 'Steps: '),
+    tools.create('div', 'score', [
+      tools.create('span', '', 'Steps: '),
       this.stepField,
     ], main);
 
-    const numbers = this.generateNumbers();
+    this.generateCells();
+    // add to document
+    document.body.prepend(main);
+  }
+
+  generateCells(data) {
+    // если не передали начальное значение - генерируем новый массив
+    const numbers = data || this.generateNumbers();
+
+    // TODO проверить очистку прежних ячеек
+    if (this.cells) {
+      this.cells.forEach((cell) => cell.div.remove());
+    }
+    this.cells = [];
 
     for (let i = 0; i < numbers.length; i++) {
-      const col = i % size;
-      const row = (i - col) / size;
+      const col = i % this.size;
+      const row = (i - col) / this.size;
       if (numbers[i] === 0) {
         // init empty cell
         this.emptyCell.col = col;
         this.emptyCell.row = row;
       } else {
+        // create cell with number
         const cell = new Cell(numbers[i], col, row);
 
-        this.cells.push(cell);
-
         cell.div.addEventListener('click', () => {
-          cell.swapWithEmpty(this.emptyCell, () => {
-            this.stepCount += 1;
-            this.stepField.innerHTML = `${this.stepCount}`;
-
-            if (this.checkWin()) {
-              setTimeout(this.showResults, 500);
-              // this.showResults();
-            }
-          });
+          this.cellClickHandler(cell);
         });
 
+        this.cells.push(cell);
         this.field.appendChild(cell.div);
       }
     }
-    // add to document
-    document.body.prepend(main);
+  }
+
+  cellClickHandler(cell) {
+    cell.swapWithEmpty(this.emptyCell, () => {
+      this.stepCount += 1;
+      this.stepField.innerHTML = `${this.stepCount}`;
+
+      if (this.checkWin()) {
+        // временная заглушка, чтобы успел прорисоваться интерфейс
+        setTimeout(this.showResults.bind(this), 500);
+        // this.showResults();
+      }
+    });
   }
 
   checkWin() {
@@ -69,12 +85,12 @@ export default class GameField {
   }
 
   generateNumbers() {
-    const numbers = [];
+    const numbers = [/* 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0 */];
     for (let i = 0; i < this.size * this.size; i++) {
       numbers.push(i);
     }
-    shuffle(numbers);
-    if (!isPuzzleSolvable(numbers)) {
+    tools.shuffle(numbers);
+    if (!tools.isPuzzleSolvable(numbers)) {
       let i = 0;
       if (numbers[i] === 0 || numbers[i + 1] === 0) i = this.size * this.size - 2;
       [numbers[i], numbers[i + 1]] = [numbers[i + 1], numbers[i]];
