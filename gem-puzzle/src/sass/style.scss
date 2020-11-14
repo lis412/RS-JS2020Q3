@@ -7,10 +7,21 @@
 }
 
 .cell {
+  box-sizing: border-box;
   width: 100px;
   height: 100px;
+  position: absolute;
+
   border: 2px solid blue;
   border-radius: 10px;
-  box-sizing: border-box;
-  position: absolute;
+
+  font-size: 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease-in;
 }

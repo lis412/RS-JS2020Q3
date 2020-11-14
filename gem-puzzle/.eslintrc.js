@@ -15,5 +15,6 @@ module.exports = {
   rules: {
     'linebreak-style': 'off',
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
+    'no-param-reassign': ['error', { props: false }],
   },
 };
