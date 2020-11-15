@@ -1,8 +1,6 @@
 import Cell from './Cell';
+import Timer from './Timer';
 import * as tools from './utils/index';
-// import create from './utils/create';
-// import isPuzzleSolvable from './utils/isPuzzleSolvable';
-// import shuffle from './utils/shuffle';
 
 const main = tools.create('main', '', [tools.create('h1', 'title', 'Puzzle game')]);
 
@@ -17,16 +15,28 @@ export default class GameField {
   init(size) {
     this.size = size;
     this.stepCount = 0;
+    this.secondCount = 0;
+    this.timer = new Timer();
     // create markdown
-    tools.create('button', 'btn', 'Reset', main).addEventListener('click', () => { this.generateCells(); });
-    this.field = tools.create('div', 'field', null, main);
     this.stepField = tools.create('div', 'step', `${this.stepCount}`);
+    this.timeField = tools.create('div', 'time', '00:00:00');
+
+    tools.create('button', 'btn', 'Start new game', main).addEventListener('click', () => { this.generateCells(); });
+    tools.create('button', 'btn', 'Pause', main).addEventListener('click', () => { this.timer.pause(); });
+    tools.create('button', 'btn', 'Countinue', main).addEventListener('click', () => { this.timer.start(); });
 
     tools.create('div', 'score', [
       tools.create('span', '', 'Steps: '),
       this.stepField,
+      tools.create('span', '', 'Time: '),
+      this.timeField,
     ], main);
 
+    this.timer
+      .init(0, (timeString) => { this.timeField.innerHTML = timeString; })
+      .start();
+
+    this.field = tools.create('div', 'field', null, main);
     this.generateCells();
     // add to document
     document.body.prepend(main);
@@ -81,7 +91,8 @@ export default class GameField {
   }
 
   showResults() {
-    console.log(`Ура! Вы решили головоломку за #:## и ${this.stepCount} ходов`);
+    this.timer.stop();
+    console.log(`Ура! Вы решили головоломку за ${this.timer.getTimeString()} и ${this.stepCount} ходов`);
   }
 
   generateNumbers() {
