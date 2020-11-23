@@ -1,35 +1,29 @@
 import Cell, { EmptyCell } from './Cell';
+import { ZERO } from './Const';
+import Board from './solver/Board';
+import Solver from './solver/Solver';
 import Timer from './Timer';
+import { exch, solvable } from './tools';
 import * as tools from './utils/index';
 
 const main = tools.create('main', '', [tools.create('h1', 'title', 'Puzzle game')]);
 
 export default class GameField {
-  emptyCell: EmptyCell; // { col: number; row: number };
-
+  emptyCell: EmptyCell = {
+    col: 0,
+    row: 0,
+  }; // { col: number; row: number };
   size: number;
-
   stepCount: number;
-
   secondCount: number;
-
   timer: Timer;
-
   stepField: HTMLElement;
-
   timeField: HTMLElement;
-
   field: HTMLElement;
-
   overlay: HTMLElement;
-
   cells: Cell[] = [];
 
   constructor() {
-    this.emptyCell = {
-      col: 0,
-      row: 0,
-    };
     this.size = 0;
     this.stepCount = 0;
     this.secondCount = 0;
@@ -44,15 +38,16 @@ export default class GameField {
     this.timeField = tools.create('div', 'time', '00:00:00');
 
     tools.create('button', 'btn', 'Start new game', main).addEventListener('click', () => {
-      this.generateCells();
-      this.stepCount = 0;
-      this.timer.reset();
+      this.startNewGame();
     });
     tools.create('button', 'btn', 'Pause', main).addEventListener('click', () => {
       this.timer.stop();
     });
     tools.create('button', 'btn', 'Countinue', main).addEventListener('click', () => {
       this.timer.start();
+    });
+    tools.create('button', 'btn', 'Solve', main).addEventListener('click', () => {
+      this.solvePuzzle();
     });
 
     tools.create(
@@ -64,15 +59,12 @@ export default class GameField {
 
     this.field = tools.create('div', 'field', null, main);
     this.overlay = tools.create('div', 'overlay', null, main);
-    tools.create(
-      'div',
-      'description',
-      `
-      Уважаемые проверяющие, если есть возможность, то прошу отложить проверку на пару дней, т.к. не успел реализовать все свои задумки. если что - мои контакты:<br>
-      Discord A_Lis#5105 или Telegram @lis412
-    `,
-      main,
-    );
+  }
+
+  private startNewGame() {
+    this.generateCells();
+    this.stepCount = 0;
+    this.timer.reset();
   }
 
   init(size: number): void {
@@ -85,39 +77,42 @@ export default class GameField {
     document.body.prepend(main);
   }
 
-  generateCells(data?: number[]): void {
+  generateCells(data?: number[][]): void {
     // если не передали начальное значение - генерируем новый массив
-    const numbers = data || this.generateNumbers();
+    const numbers = data || GameField.generateNumbers(this.size);
 
     // TODO проверить очистку прежних ячеек
-    if (this.cells) {
-      this.cells.forEach((cell) => cell.div.remove());
-    }
+    // if (this.cells.length) {
+    //   this.cells.forEach((cell) => cell.div.remove());
+    // }
+    this.cells.forEach((cell) => cell.div.remove());
     this.cells = [];
 
-    for (let i = 0; i < numbers.length; i++) {
-      const col = i % this.size;
-      const row = (i - col) / this.size;
-      if (numbers[i] === 0) {
-        // init empty cell
-        this.emptyCell.col = col;
-        this.emptyCell.row = row;
-      } else {
-        // create cell with number
-        const cell = new Cell(numbers[i], col, row);
+    for (let row = 0; row < numbers.length; row++) {
+      for (let col = 0; col < numbers.length; col++) {
+        const cellValue = numbers[row][col];
+        if (cellValue === 0) {
+          // init empty cell
+          this.emptyCell = { col, row };
+          // this.emptyCell.col = col;
+          // this.emptyCell.row = row;
+        } else {
+          // create cell with number
+          const cell = new Cell(cellValue, row, col);
 
-        cell.div.addEventListener('click', () => {
-          this.cellClickHandler(cell);
-        });
+          cell.div.addEventListener('click', () => {
+            this.cellClickHandler(cell);
+          });
 
-        this.cells.push(cell);
-        this.field.appendChild(cell.div);
+          this.cells.push(cell);
+          this.field.appendChild(cell.div);
+        }
       }
     }
   }
 
-  cellClickHandler(cell: Cell): void {
-    cell.swapWithEmpty(this.emptyCell, () => {
+  cellClickHandler(cell?: Cell): void {
+    cell?.swapWithEmpty(this.emptyCell, () => {
       this.stepCount += 1;
       this.stepField.innerHTML = `${this.stepCount}`;
 
@@ -130,7 +125,8 @@ export default class GameField {
   }
 
   checkWin(): boolean {
-    return this.cells.reduce((result: boolean, cell: Cell) => result && cell.isSolved(this.size), true);
+    return this.cells.every((cell) => cell.isSolved(this.size));
+    // return this.cells.reduce((result: boolean, cell: Cell) => result && cell.isSolved(this.size), true);
   }
 
   showResults(): void {
@@ -173,19 +169,73 @@ export default class GameField {
     // ${this.timer.getTimeString()} и ${this.stepCount} ходов`);
   }
 
-  generateNumbers(): number[] {
+  static generateNumbers(dimension: number): number[][] {
     const numbers = [
-      /* 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 */
+      // 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
     ];
-    for (let i = 0; i < this.size * this.size; i++) {
+    for (let i = 0; i < dimension * dimension; i++) {
       numbers.push(i);
     }
     tools.shuffle(numbers);
-    if (!tools.isPuzzleSolvable(numbers)) {
-      let i = 0;
-      if (numbers[i] === 0 || numbers[i + 1] === 0) i = this.size * this.size - 2;
-      [numbers[i], numbers[i + 1]] = [numbers[i + 1], numbers[i]];
+
+    const result: number[][] = [];
+    let empty: EmptyCell = { row: 0, col: 0 };
+    for (let row = 0; row < dimension; row++) {
+      result[row] = [];
+      for (let col = 0; col < dimension; col++) {
+        result[row][col] = numbers[row * dimension + col];
+        if (result[row][col] === ZERO) {
+          empty = { row, col };
+        }
+      }
     }
-    return numbers;
+    if (!solvable(numbers)) {
+      if (empty.row === 0) {
+        exch(result, 1, 0, 1, 1);
+      } else {
+        exch(result, 0, 0, 0, 1);
+      }
+    }
+
+    return result;
+  }
+
+  solvePuzzle(): void {
+    const numbers: number[][] = [];
+    for (let i = 0; i < this.size; i++) {
+      numbers[i] = [];
+    }
+    this.cells.forEach((cell) => {
+      numbers[cell.row][cell.col] = cell.num;
+    }, []);
+    numbers[this.emptyCell.row][this.emptyCell.col] = 0;
+    const startBoard = new Board(numbers);
+    const solver = new Solver(startBoard);
+
+    const loopTask = (i: number, board: Board) => {
+      setTimeout(() => {
+        const cell = this.cellAtPos(board.emptyCol, board.emptyRow);
+        this.cellClickHandler(cell);
+      }, 1000 * i);
+    };
+
+    if (solver.isSolvable) {
+      let i = 0;
+      let board = solver.solution.pop();
+      while (board) {
+        loopTask(i, board);
+        board = solver.solution.pop();
+        i += 1;
+      }
+      // solver.solution.forEach((board, index) => {
+      //   loopTask(index, board);
+      // });
+    } else {
+      alert(`can't solve!`);
+    }
+  }
+
+  cellAtPos(col: number, row: number): Cell | undefined {
+    return this.cells.find((cell) => cell.col === col && cell.row === row);
   }
 }

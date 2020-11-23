@@ -24,6 +24,7 @@ module.exports = {
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
     'no-param-reassign': ['error', { props: false }],
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
+    "@typescript-eslint/lines-between-class-members": ["off"],
   },
   settings: {
     'import/extensions': ['.js', '.ts'],

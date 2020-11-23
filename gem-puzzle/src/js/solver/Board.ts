@@ -11,50 +11,52 @@ const enum Direction {
 
 export default class Board {
   private dimension = 0;
-
   private tiles: number[][];
-
-  private emptyRow = 0;
-
-  private emptyCol = 0;
-
-  private hamming = 0;
-
+  public emptyRow = 0;
+  public emptyCol = 0;
   public manhattan = 0;
 
   // create a board from an n-by-n array of tiles,
   // where tiles[row][col] = tile at (row, col)
   constructor(tiles: number[][]) {
-    let hammingTmp = 0;
+    // let hammingTmp = 0;
     let manhattanTmp = 0;
-    let rowTmp;
-    let colTmp;
+    // let rowTmp;
+    // let colTmp;
 
     this.dimension = tiles.length;
     this.tiles = [];
-    for (let i = 0; i < this.dimension; i++) {
-      for (let j = 0; j < this.dimension; j++) {
-        this.tiles[i][j] = tiles[i][j];
+
+    this.tiles = tools.arrayCopy(tiles);
+
+    manhattanTmp = this.calcManhattan();
+    this.manhattan = manhattanTmp;
+  }
+
+  private calcManhattan(): number {
+    let manhattanTmp = 0;
+    for (let row = 0; row < this.dimension; row++) {
+      // this.tiles[row] = [];
+      for (let col = 0; col < this.dimension; col++) {
+        // this.tiles = tools.arrayCopy(tiles);
+        const cellValue = this.tiles[row][col];
+        // this.tiles[row][col] = cellValue;
         /* get pos for ZERO */
-        if (tiles[i][j] === ZERO) {
-          this.emptyRow = i;
-          this.emptyCol = j;
-        }
-        /* calc hamming */
-        if (tiles[i][j] !== ZERO && tiles[i][j] !== i * this.dimension + j + 1) {
-          hammingTmp += 1;
-        }
-        /* calc manhattan */
-        if (tiles[i][j] !== ZERO) {
-          rowTmp = (tiles[i][j] - 1) / this.dimension;
-          colTmp = (tiles[i][j] - 1) % this.dimension;
-          manhattanTmp += Math.abs(rowTmp - i);
-          manhattanTmp += Math.abs(colTmp - j);
+        if (cellValue === ZERO) {
+          this.emptyRow = row;
+          this.emptyCol = col;
+        } else {
+          /* calc manhattan */
+          const colTmp = (cellValue - 1) % this.dimension;
+          const rowTmp = (cellValue - 1 - colTmp) / this.dimension;
+          // rowTmp = Math.floor((cellValue - 1) / this.dimension);
+          // colTmp = (cellValue - 1) % this.dimension;
+          manhattanTmp += Math.abs(rowTmp - row);
+          manhattanTmp += Math.abs(colTmp - col);
         }
       }
     }
-    this.manhattan = manhattanTmp;
-    this.hamming = hammingTmp;
+    return manhattanTmp;
   }
 
   // is this board the goal board?
@@ -67,9 +69,9 @@ export default class Board {
     if (that == null) return false;
     if (that === this) return true;
     if (this.dimension !== that.dimension) return false;
-    for (let i = 0; i < this.dimension; i++) {
-      for (let j = 0; j < this.dimension; j++) {
-        if (this.tiles[i][j] !== that.tiles[i][j]) return false;
+    for (let row = 0; row < this.dimension; row++) {
+      for (let col = 0; col < this.dimension; col++) {
+        if (this.tiles[row][col] !== that.tiles[row][col]) return false;
       }
     }
     return true;
@@ -77,7 +79,7 @@ export default class Board {
 
   // all neighboring boards
   public neighbors(): Array<Board> {
-    const neighbors = new Array<Board>(this.dimension);
+    const neighbors: Board[] = [];
     let neighbor: Board | null;
     const directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
     directions.forEach((direction) => {
@@ -127,6 +129,16 @@ export default class Board {
       default:
         return null;
     }
+  }
+
+  public twin(): Board {
+    const tilesCopy = tools.arrayCopy(this.tiles);
+    if (this.emptyRow === 0) {
+      tools.exch(tilesCopy, 1, 0, 1, 1);
+    } else {
+      tools.exch(tilesCopy, 0, 0, 0, 1);
+    }
+    return new Board(tilesCopy);
   }
 
   // private arrayCopy(source: number[][]): number[][] {

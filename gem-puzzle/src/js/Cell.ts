@@ -2,20 +2,16 @@ import { CELL_SIZE } from './Const';
 
 export interface EmptyCell {
   row: number;
-
   col: number;
 }
 
 export default class Cell {
   num: number;
-
   col: number;
-
   row: number;
-
   div: HTMLDivElement;
 
-  constructor(num: number, col: number, row: number) {
+  constructor(num: number, row: number, col: number) {
     this.num = num;
     this.col = col;
     this.row = row;
