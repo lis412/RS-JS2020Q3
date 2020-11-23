@@ -6,8 +6,14 @@
  * @param  {...array} dataAttr
  */
 
-export default function create(el, classNames, child, parent, ...dataAttr) {
-  let element = null;
+export default function create(
+  el: string,
+  classNames: string,
+  child?: HTMLElement | string | Array<HTMLElement> | null,
+  parent?: HTMLElement,
+  dataAttr?: string[][],
+): HTMLElement {
+  let element: HTMLElement;
   try {
     element = document.createElement(el);
   } catch (error) {
@@ -28,7 +34,7 @@ export default function create(el, classNames, child, parent, ...dataAttr) {
     parent.appendChild(element);
   }
 
-  if (dataAttr.length) {
+  if (dataAttr?.length) {
     dataAttr.forEach(([attrName, attrValue]) => {
       if (attrValue === '') {
         element.setAttribute(attrName, '');

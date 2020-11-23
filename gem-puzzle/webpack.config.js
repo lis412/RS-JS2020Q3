@@ -13,15 +13,32 @@ module.exports = (env, options) => {
     devtool: isProduction ? false : 'source-map',
     watch: !isProduction,
     entry: [
-      './src/index.js',
+      // './src/index.js',
+      './src/index.ts',
       './src/sass/style.scss',
     ],
     output: {
       path: path.join(__dirname, '/dist'),
       filename: 'script.js',
     },
+    resolve: {
+      // Добавить расширения '.ts' и '.tsx' в список разрешаемых
+      extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+    },
     module: {
       rules: [
+        {
+          test: /\.tsx?$/,
+          exclude: /(node_modules|bower_components)/,
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true
+              }
+            }
+          ]
+        },
         {
           test: /\.js$/,
           exclude: /(node_modules|bower_components)/,
@@ -57,7 +74,7 @@ module.exports = (env, options) => {
     plugins: [
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
-        template: 'index.html',
+        template: './public/index.html',
       }),
       new MiniCssExtractPlugin({
         filename: 'style.css',
