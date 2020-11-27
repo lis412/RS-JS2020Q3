@@ -1,5 +1,5 @@
 import Cell, { EmptyCell } from './Cell';
-import { ZERO } from './Const';
+import { SAVED_GAME_KEY, ZERO } from './Const';
 import Board from './solver/Board';
 import Solver from './solver/Solver';
 import Timer from './Timer';
@@ -48,6 +48,12 @@ export default class GameField {
     });
     tools.create('button', 'btn', 'Solve', main).addEventListener('click', () => {
       this.solvePuzzle();
+    });
+    tools.create('button', 'btn', 'Save', main).addEventListener('click', () => {
+      this.saveGame();
+    });
+    tools.create('button', 'btn', 'Load', main).addEventListener('click', () => {
+      this.loadGame();
     });
 
     tools.create(
@@ -154,6 +160,7 @@ export default class GameField {
 
       this.overlay.classList.remove('overlay--active');
       document.body.classList.remove('no-scroll');
+
       modal.remove();
     };
 
@@ -201,14 +208,7 @@ export default class GameField {
   }
 
   solvePuzzle(): void {
-    const numbers: number[][] = [];
-    for (let i = 0; i < this.size; i++) {
-      numbers[i] = [];
-    }
-    this.cells.forEach((cell) => {
-      numbers[cell.row][cell.col] = cell.num;
-    }, []);
-    numbers[this.emptyCell.row][this.emptyCell.col] = 0;
+    const numbers: number[][] = this.extractNumbersArr();
     const startBoard = new Board(numbers);
     const solver = new Solver(startBoard);
 
@@ -216,7 +216,7 @@ export default class GameField {
       setTimeout(() => {
         const cell = this.cellAtPos(board.emptyCol, board.emptyRow);
         this.cellClickHandler(cell);
-      }, 1000 * i);
+      }, 500 * i);
     };
 
     if (solver.isSolvable) {
@@ -231,11 +231,42 @@ export default class GameField {
       //   loopTask(index, board);
       // });
     } else {
+      // TODO replace with normal message
       alert(`can't solve!`);
     }
   }
 
+  private extractNumbersArr() {
+    const numbers: number[][] = [];
+    for (let i = 0; i < this.size; i++) {
+      numbers[i] = [];
+    }
+    this.cells.forEach((cell) => {
+      numbers[cell.row][cell.col] = cell.num;
+    }, []);
+    numbers[this.emptyCell.row][this.emptyCell.col] = 0;
+    return numbers;
+  }
+
   cellAtPos(col: number, row: number): Cell | undefined {
     return this.cells.find((cell) => cell.col === col && cell.row === row);
+  }
+
+  saveGame(): void {
+    // save game to local storage
+    const numbers: number[][] = this.extractNumbersArr();
+    tools.setToStorage(SAVED_GAME_KEY, numbers);
+  }
+
+  loadGame(): boolean {
+    // TODO add confirmation dialog.
+    const numbers = tools.getFromStorage(SAVED_GAME_KEY);
+    if (numbers) {
+      this.generateCells(numbers);
+      this.stepCount = 0;
+      this.timer.reset();
+      return true;
+    }
+    return false;
   }
 }
