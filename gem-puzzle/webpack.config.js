@@ -28,6 +28,10 @@ module.exports = (env, options) => {
     module: {
       rules: [
         {
+          test: /\.wav$/,
+          loader: 'file-loader',
+        },
+        {
           test: /\.tsx?$/,
           use: [
             {

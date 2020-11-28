@@ -1,4 +1,5 @@
 import { CELL_SIZE } from './Const';
+import soundfile from '../assets/sounds/tink.wav';
 
 export interface EmptyCell {
   row: number;
@@ -17,6 +18,7 @@ export default class Cell {
     this.row = row;
 
     this.div = this.generateDiv();
+    this.div.addEventListener('click', Cell.playSound);
     this.updatePosition();
   }
 
@@ -48,5 +50,13 @@ export default class Cell {
 
   isSolved(size: number): boolean {
     return this.col + this.row * size + 1 === this.num;
+  }
+
+  static playSound(): void {
+    const audio = new Audio(soundfile);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play();
+    }
   }
 }
