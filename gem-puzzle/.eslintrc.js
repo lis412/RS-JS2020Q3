@@ -16,8 +16,9 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
     project: ['./tsconfig.json'],
+    // extraFileExtensions: [],
   },
-  ignorePatterns: ['dist/*', '.eslintrc.js', 'webpack.config.js'],
+  ignorePatterns: ['dist/*', '.eslintrc.js', 'webpack.config.js', '*.png', '*.scss', '*.wav'],
   plugins: ['@typescript-eslint'],
   rules: {
     'linebreak-style': 'off',
