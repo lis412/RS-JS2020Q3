@@ -27,7 +27,7 @@ export default class Board {
     this.dimension = tiles.length;
     this.tiles = [];
 
-    this.tiles = tools.arrayCopy(tiles);
+    this.tiles = tools.matrixCopy(tiles);
 
     manhattanTmp = this.calcManhattan();
     this.manhattan = manhattanTmp;
@@ -98,32 +98,32 @@ export default class Board {
         if (this.emptyCol === 0) {
           return null;
         }
-        tilesCopy = tools.arrayCopy(this.tiles);
-        tools.exch(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow, this.emptyCol - 1);
+        tilesCopy = tools.matrixCopy(this.tiles);
+        tools.swapMatrixItems(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow, this.emptyCol - 1);
         return new Board(tilesCopy);
 
       case Direction.UP:
         if (this.emptyRow === 0) {
           return null;
         }
-        tilesCopy = tools.arrayCopy(this.tiles);
-        tools.exch(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow - 1, this.emptyCol);
+        tilesCopy = tools.matrixCopy(this.tiles);
+        tools.swapMatrixItems(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow - 1, this.emptyCol);
         return new Board(tilesCopy);
 
       case Direction.RIGHT:
         if (this.emptyCol === this.dimension - 1) {
           return null;
         }
-        tilesCopy = tools.arrayCopy(this.tiles);
-        tools.exch(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow, this.emptyCol + 1);
+        tilesCopy = tools.matrixCopy(this.tiles);
+        tools.swapMatrixItems(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow, this.emptyCol + 1);
         return new Board(tilesCopy);
 
       case Direction.DOWN:
         if (this.emptyRow === this.dimension - 1) {
           return null;
         }
-        tilesCopy = tools.arrayCopy(this.tiles);
-        tools.exch(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow + 1, this.emptyCol);
+        tilesCopy = tools.matrixCopy(this.tiles);
+        tools.swapMatrixItems(tilesCopy, this.emptyRow, this.emptyCol, this.emptyRow + 1, this.emptyCol);
         return new Board(tilesCopy);
 
       default:
@@ -132,11 +132,11 @@ export default class Board {
   }
 
   public twin(): Board {
-    const tilesCopy = tools.arrayCopy(this.tiles);
+    const tilesCopy = tools.matrixCopy(this.tiles);
     if (this.emptyRow === 0) {
-      tools.exch(tilesCopy, 1, 0, 1, 1);
+      tools.swapMatrixItems(tilesCopy, 1, 0, 1, 1);
     } else {
-      tools.exch(tilesCopy, 0, 0, 0, 1);
+      tools.swapMatrixItems(tilesCopy, 0, 0, 0, 1);
     }
     return new Board(tilesCopy);
   }

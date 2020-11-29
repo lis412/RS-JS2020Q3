@@ -1,0 +1,70 @@
+@import "variables";
+
+/// Управление отзывчивостью.
+/// @access public
+/// @param {String} $breakpoint - точка останова
+/// @requires $breakpoints
+@mixin respond-to($breakpoint) {
+  $raw-query: map-get($breakpoints, $breakpoint);
+
+  @if $raw-query {
+    $query: if(
+        type-of($raw-query) == 'string',
+        unquote($raw-query),
+        inspect($raw-query)
+    );
+
+    @media #{$query} {
+      @content;
+    }
+  } @else {
+    @error 'Не указано значение для `#{$breakpoint}`. '
+       + 'Пожалуйста, убедитесь, что точка останова объявлена в карте `$breakpoints`.';
+  }
+}
+
+@mixin title-large {
+    font-family: $base-font-family;
+    font-weight: $font-weight-normal;
+    font-size: 2.75rem;
+    line-height: 1.3;
+    color: $color-section-title--white;
+
+    @include respond-to("small") {
+      font-size: 1.5625rem;
+      letter-spacing: 0.095rem;
+      text-align: center;
+    }
+}
+
+@mixin title {
+    font-family: $base-font-family;
+    font-size: 2.1875rem;
+    font-weight: $font-weight-normal;
+    line-height: 1.3;
+    letter-spacing: 0.131rem;
+    color: $color-section-title--dark-l;
+
+    @include respond-to("small") {
+      font-size: 1.5625rem;
+      letter-spacing: 0.095rem;
+      text-align: center;
+    }
+}
+
+@mixin sub-title {
+    font-family: $base-font-family;
+    font-size: 1.25rem;
+    font-weight: $font-weight-normal;
+    line-height: 1.15;
+    letter-spacing: 0.075rem;
+    color: $color-section-title--dark-l;
+}
+
+@mixin text {
+    font-family: $further-font-family;
+    font-size: 0.9375rem;
+    font-weight: $font-weight-normal;
+    line-height: 1.6;
+}
+

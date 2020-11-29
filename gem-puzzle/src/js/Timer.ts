@@ -1,12 +1,12 @@
 export default class Timer {
   counter = 0;
 
-  callback: null | ((str: string) => void);
+  onTimerTick: null | ((str: string) => void);
 
   timerId: NodeJS.Timeout | null = null;
 
   constructor() {
-    this.callback = null;
+    this.onTimerTick = null;
     this.reset();
   }
 
@@ -18,7 +18,7 @@ export default class Timer {
 
   init(value: number, callback: (str: string) => void): Timer {
     this.counter = value;
-    this.callback = callback;
+    this.onTimerTick = callback;
     return this;
   }
 
@@ -27,9 +27,10 @@ export default class Timer {
     if (!this.timerId) {
       this.timerId = setInterval(() => {
         this.counter += 1;
-        if (this.callback) this.callback(this.getTimeString());
+        if (this.onTimerTick) this.onTimerTick(this.getTimeString());
       }, 1000);
     }
+
     return this;
   }
 

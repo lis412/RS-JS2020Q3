@@ -1,0 +1,60 @@
+$base-font-size: 16px;
+$base-line-height: 1.5;
+$base-font-family:'Georgia';
+$further-font-family: 'Arial';
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+
+$max-width-percent: 100%;
+
+$breakpoints: (
+  'small': (min-width: 320px) and (max-width:767px),
+  'medium': (min-width: 768px) and (max-width:1279px),
+  'large': (min-width: 1250px)
+);
+
+//-------Title-Color
+$color-header-title--primary:#F1CDB3;
+$color-header-title--dark-l:#545454;
+$color-header-sub-title--white: #FFFFFF;
+$color-header-sub-title--dark-3xl:#292929;
+$color-section-title--dark-l: #545454;
+$color-section-title--white: #FFFFFF;
+
+//-------Text-Color
+$color-text--dark-s: #CDCDCD;
+$color-text--dark-xl: #4C4C4C;
+$color-text--dark-l: #545454;
+$color-text--dark-m: #B2B2B2;
+$color-text--black: #000000;
+
+//-------Link-Color
+$color-link--dark-s: #CDCDCD;
+$color-link--dark-l: #545454;
+$color-link-active--light-s: #FAFAFA;
+$color-link-active--dark-l:#545454;
+$color-link-hover--light-s: #FAFAFA;
+$color-link-hover--dark-3xl:#292929;
+$color-link--primary: #F1CDB3;
+
+//-------Background-Color
+$color-bg--primary: #F1CDB3;
+$color-bg--primary-light: #FDDCC4;
+$color-bg--light-l: #F6F6F6;
+$color-bg--light-s: #FAFAFA;
+$color-bg--white: #FFFFFF;
+$color-bg--dark-3xl: #292929;
+
+
+//-------Button-Color
+$color-btn--primary: #dbdbdb;
+$color-btn--primary-light: #7a7a7a;
+
+//-------Border-Color
+$color-border--primary: #616160;
+$color-border--primary-light: #616160;
+$color-border--dark-s: #CDCDCD;
+
+//-------SVG-Color
+$color-svg--dark-3xl:#292929;
+$color-svg--dark-s: #CDCDCD;

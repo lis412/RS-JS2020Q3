@@ -1,0 +1,147 @@
+@import "../helper/variables";
+@import "../helper/mixin";
+
+
+.btn-burger {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    width: 30px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-size: 0;
+    line-height: 0;
+    background-color: transparent;
+    outline: transparent;
+    cursor: pointer;
+
+    span,
+    span::before,
+    span::after {
+        position: absolute;
+        display: block;
+        width: 1.875rem;
+        height: 0.125rem;
+        background-color: $color-btn--primary;
+        transition: 500ms linear all;
+    }
+
+    &--color-dark {
+        & > span,
+         span::before,
+         span::after{
+             background-color: #292929;
+         }
+     }
+
+    span::before,
+    span::after {
+        content: " ";
+    }
+
+    & span::before {
+        top: -0.6rem;
+    }
+
+    & span::after {
+        top: 0.6rem;
+    }
+
+        &--opened {
+            margin-right: .625rem;
+
+            overflow: hidden;
+
+            & span {
+                transform: rotate(90deg);
+            }
+
+            & span:before {
+                top: -0.6rem;
+            }
+
+            & span::after {
+                top: 0.6rem;
+            }
+
+        }
+}
+
+
+.btn {
+    display: flex;
+    padding: 10px;
+    margin: 0;
+    font-family: $base-font-family;
+    font-size: 1.0625rem;
+    letter-spacing: 0.06rem;
+    line-height: 1.1;
+    font-weight: 400;
+    text-align: center;
+    color: #292929;
+    border: 2px solid $color-border--primary;
+    border-radius: 6.25rem;
+    background-color: $color-btn--primary;
+    cursor: pointer;
+    outline: transparent;
+    box-sizing: border-box;
+
+    &:hover {
+        border: 2px solid $color-border--primary-light;
+        background-color: $color-btn--primary-light;
+    }
+
+    &:active {
+        opacity: 0.75;
+    }
+
+    &--bg-transparent {
+        border: 2px solid $color-border--primary;
+        background-color: transparent;
+    }
+}
+
+.btn-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 3.2rem;
+    min-height: 3.2rem;
+    padding: 0;
+    margin: 0;
+    font-size: 20px;
+    border: 2px solid $color-border--primary;
+    border-radius: 100%;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+
+    &>svg {
+        fill: $color-svg--dark-3xl;
+    }
+
+    &:hover {
+        background-color: $color-btn--primary-light;
+    }
+
+    &[disabled] {
+        border: 2px solid $color-border--dark-s;
+        cursor: default;
+
+        &>svg {
+            fill: $color-svg--dark-s;
+        }
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+
+    &--current {
+        border-color: $color-border--primary-light;
+        background-color: $color-btn--primary-light;
+        cursor: default;
+    }
+}

@@ -1,40 +1,24 @@
-// body {
-//   background-color: black;
-//   color: white;
-// }
+@import "vendors/normalize";
 
-.field {
-  width: 360px;
-  height: 360px;
-  border: 1px solid black;
-  border-radius: 10px;
-  position: relative;
-}
+@import "helper/variables";
+@import "helper/mixin";
 
-.cell {
-  box-sizing: border-box;
-  width: 90px;
-  height: 90px;
-  position: absolute;
+@import "base/base";
 
-  border: 2px solid blue;
-  border-radius: 10px;
+@import "components/buttons";
+// @import "components/slider";
+// @import "components/pet-card";
+// @import "components/gallery";
+@import "components/popup";
+@import "components/field";
+@import "components/cell";
 
-  font-size: 2rem;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-
-  transition: all 0.3s ease-in;
-}
-
-.description {
-  width: 30%;
-}
-
-.notransition {
-  transition: none !important;
-}
+// @import "layout/header";
+// @import "layout/main";
+// @import "layout/not-only";
+// @import "layout/about";
+// @import "layout/friends";
+// @import "layout/help";
+// @import "layout/addition";
+// @import "layout/footer";
+// @import "layout/pets";

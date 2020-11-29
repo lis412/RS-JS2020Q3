@@ -3,31 +3,28 @@ import { CELL_SIZE, DEFAULT_GAME_SIZE, SAVED_GAME_KEY, ZERO } from './Const';
 import Board from './solver/Board';
 import Solver from './solver/Solver';
 import Timer from './Timer';
-import { exch, solvable } from './tools';
+import { swapMatrixItems, solvable } from './tools';
 import * as tools from './utils/index';
 import gameImage from '../assets/images/img2.png';
-import { MoveParams } from './types';
+import { DEFAULT_EMPTY_CELL, MoveParams } from './types';
 
 const main = tools.create('main', '', [tools.create('h1', 'title', 'Puzzle game')]);
 
 export default class GameField {
-  emptyCell: EmptyCell = {
-    col: 0,
-    row: 0,
-  }; // { col: number; row: number };
+  emptyCell = DEFAULT_EMPTY_CELL;
   stepCount: number;
   secondCount: number;
   timer: Timer;
-  stepField: HTMLElement;
-  timeField: HTMLElement;
-  field: HTMLElement;
-  overlay: HTMLElement;
+  stepField!: HTMLElement;
+  timeField!: HTMLElement;
+  field!: HTMLElement;
+  overlay!: HTMLElement;
   cells: Cell[] = [];
-  sizeControl: HTMLSelectElement;
-  modeControl: HTMLSelectElement;
+  sizeControl!: HTMLSelectElement;
+  modeControl!: HTMLSelectElement;
   isLoadEnable = false;
-  loadButton: HTMLElement;
-  saveButton: HTMLElement;
+  loadButton!: HTMLElement;
+  saveButton!: HTMLElement;
   gameSize = DEFAULT_GAME_SIZE;
   gameMode: 'numbers' | 'images' = 'numbers';
 
@@ -42,40 +39,48 @@ export default class GameField {
     });
 
     // create markdown
+    this.createInitialBoard();
+  }
+
+  private createInitialBoard(): void {
     this.stepField = tools.create('div', 'step', `${this.stepCount}`);
     this.timeField = tools.create('div', 'time', '00:00:00');
 
-    tools.create('button', 'btn', 'Start new game', main).addEventListener('click', () => {
+    const menu = tools.create('nav', 'menu', null, main);
+    tools.create('button', 'btn', 'Start new game', menu).addEventListener('click', () => {
       this.startNewGame();
     });
     // TODO combine pause/continue buttons
-    tools.create('button', 'btn', 'Pause', main).addEventListener('click', () => {
+    tools.create('button', 'btn', 'Pause', menu).addEventListener('click', () => {
       this.timer.stop();
     });
-    tools.create('button', 'btn', 'Countinue', main).addEventListener('click', () => {
+    tools.create('button', 'btn', 'Countinue', menu).addEventListener('click', () => {
       this.timer.start();
     });
-    tools.create('button', 'btn', 'Solve', main).addEventListener('click', () => {
+    tools.create('button', 'btn', 'Solve', menu).addEventListener('click', () => {
       this.solvePuzzle();
     });
-    this.saveButton = tools.create('button', 'btn', 'Save', main);
+    this.saveButton = tools.create('button', 'btn', 'Save', menu);
     this.saveButton.addEventListener('click', () => {
       this.saveGame();
     });
-    this.loadButton = tools.create('button', 'btn', 'Load', main, this.isLoadEnable ? [] : [['disabled', '']]);
+    this.loadButton = tools.create('button', 'btn', 'Load', menu, this.isLoadEnable ? [] : [['disabled', '']]);
     this.loadButton.addEventListener('click', () => {
       this.loadGame();
     });
-    tools.create('br', '', '', main);
+    tools.create('br', '', '', menu);
     // create size selector
-    this.sizeControl = <HTMLSelectElement>tools.create('select', 'size', null, main);
+    this.sizeControl = <HTMLSelectElement>tools.create('select', 'size', null, menu);
+
     for (let i = 3; i <= 5; i++) {
       tools.create('option', '', `${i}x${i}`, this.sizeControl, [
         ['value', `${i}`],
         i === DEFAULT_GAME_SIZE ? ['selected', ''] : [],
       ]);
     }
+
     this.sizeControl.addEventListener('change', this.sizeControlChangeHadler.bind(this));
+
     // create mode selector
     this.modeControl = <HTMLSelectElement>tools.create(
       'select',
@@ -87,7 +92,7 @@ export default class GameField {
         ]),
         tools.create('option', '', `Images`, null, [['value', `images`]]),
       ],
-      main,
+      menu,
     );
     this.modeControl.addEventListener('change', this.modeControlChangeHadler.bind(this));
 
@@ -110,11 +115,8 @@ export default class GameField {
 
   init(size: number): void {
     this.gameSize = size;
-
     this.timer.start();
-
     this.generateCells();
-    // add to document
     document.body.prepend(main);
   }
 
@@ -122,25 +124,19 @@ export default class GameField {
     // если не передали начальное значение - генерируем новый массив
     const numbers = data || GameField.generateNumbers(this.gameSize);
 
-    // TODO проверить очистку прежних ячеек
-    // if (this.cells.length) {
-    //   this.cells.forEach((cell) => cell.div.remove());
-    // }
     this.cells.forEach((cell) => cell.div.remove());
     this.cells = [];
 
     for (let row = 0; row < numbers.length; row++) {
       for (let col = 0; col < numbers.length; col++) {
         const cellValue = numbers[row][col];
+
         if (cellValue === 0) {
           // init empty cell
           this.emptyCell = { col, row };
-          // this.emptyCell.col = col;
-          // this.emptyCell.row = row;
         } else {
           // create cell with number
           const cell = new Cell(cellValue, row, col);
-
           cell.div.addEventListener('click', () => {
             if (!cell.isMoving) {
               this.cellClickHandler(cell);
@@ -158,6 +154,7 @@ export default class GameField {
         }
       }
     }
+
     if (this.gameMode === 'images') {
       this.drawImages();
     }
@@ -169,14 +166,12 @@ export default class GameField {
       this.stepField.innerHTML = `${this.stepCount}`;
 
       if (this.checkWin()) {
-        // временная заглушка, чтобы успел прорисоваться интерфейс
-        setTimeout(this.showResults.bind(this), 500);
-        // this.showResults();
+        this.showResults();
       }
     }
   }
 
-  checkWin(): boolean {
+  private checkWin(): boolean {
     return this.cells.every((cell) => cell.isSolved(this.gameSize));
     // return this.cells.reduce((result: boolean, cell: Cell) => result && cell.isSolved(this.size), true);
   }
@@ -184,69 +179,77 @@ export default class GameField {
   showResults(): void {
     this.timer.stop();
 
-    const modal = tools.create(
-      'div',
-      'popup',
-      `<div class="popup-info">
-        <div>
-          <span class="result-title">Ура!</span>
-          <span class="result-message">
-          Вы решили головоломку за ${this.timer.getTimeString()} и ${this.stepCount} ходов
-          </span>    
-        </div>
-      </div>`,
-      document.body,
-    );
-
     const onClickHandler = () => {
       this.generateCells();
       this.stepCount = 0;
       this.stepField.innerHTML = `${this.stepCount}`;
       this.timer.reset().start();
-
-      this.overlay.classList.remove('overlay--active');
-      document.body.classList.remove('no-scroll');
-
-      modal.remove();
     };
 
-    tools
-      .create('button', 'result-button', 'Start new game', modal)
-      .addEventListener('click', onClickHandler.bind(this));
+    this.showMessage(
+      'Ура!',
+      `Вы решили головоломку за ${this.timer.getTimeString()} и ${this.stepCount} ходов`,
+      'Start new game',
+      onClickHandler.bind(this),
+    );
+  }
+
+  private showMessage(messageTitle: string, messageText: string, buttonText: string, onClickHandler?: () => void) {
+    const modal = tools.create(
+      'div',
+      'popup',
+      `<div class="popup-info">
+        <div>
+          <span class="message-title">${messageTitle}</span>
+          <span class="message-text">
+          ${messageText}
+          </span>    
+        </div>
+      </div>`,
+      document.body,
+    );
+    tools.create('button', 'message-button', buttonText, modal).addEventListener('click', () => {
+      onClickHandler?.();
+      this.overlay.classList.remove('overlay--active');
+      document.body.classList.remove('no-scroll');
+      modal.remove();
+    });
 
     this.overlay.classList.toggle('overlay--active');
 
     document.body.appendChild(modal);
     document.body.classList.add('no-scroll');
-    // console.log(`Ура! Вы решили головоломку за
-    // ${this.timer.getTimeString()} и ${this.stepCount} ходов`);
   }
 
   static generateNumbers(dimension: number): number[][] {
-    const numbers = [
-      // 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0
-    ];
+    const numbers = [];
+
     for (let i = 0; i < dimension * dimension; i++) {
       numbers.push(i);
     }
+
     tools.shuffle(numbers);
 
     const result: number[][] = [];
     let empty: EmptyCell = { row: 0, col: 0 };
+
     for (let row = 0; row < dimension; row++) {
       result[row] = [];
+
       for (let col = 0; col < dimension; col++) {
         result[row][col] = numbers[row * dimension + col];
+
         if (result[row][col] === ZERO) {
           empty = { row, col };
         }
       }
     }
+
     if (!solvable(result)) {
       if (empty.row === 0) {
-        exch(result, 1, 0, 1, 1);
+        swapMatrixItems(result, 1, 0, 1, 1);
       } else {
-        exch(result, 0, 0, 0, 1);
+        swapMatrixItems(result, 0, 0, 0, 1);
       }
     }
 
@@ -273,24 +276,32 @@ export default class GameField {
         board = solver.solution.pop();
         i += 1;
       }
-      // solver.solution.forEach((board, index) => {
-      //   loopTask(index, board);
-      // });
     } else {
       // TODO replace with normal message
-      alert(`can't solve!`);
+      const onClickHandler = () => {
+        this.generateCells();
+        this.stepCount = 0;
+        this.stepField.innerHTML = `${this.stepCount}`;
+        this.timer.reset().start();
+      };
+
+      this.showMessage('Ошибка', 'Не удалось найти решение :(', 'Start new game', onClickHandler.bind(this));
     }
   }
 
   private extractNumbersArr() {
     const numbers: number[][] = [];
+
     for (let i = 0; i < this.gameSize; i++) {
       numbers[i] = [];
     }
+
     this.cells.forEach((cell) => {
       numbers[cell.row][cell.col] = cell.num;
     }, []);
+
     numbers[this.emptyCell.row][this.emptyCell.col] = 0;
+
     return numbers;
   }
 
@@ -308,34 +319,40 @@ export default class GameField {
   loadGame(): boolean {
     // TODO add confirmation dialog.
     const numbers = tools.getFromStorage(`${SAVED_GAME_KEY}_${this.gameSize}`);
+
     if (numbers) {
       this.generateCells(numbers);
       this.stepCount = 0;
       this.timer.reset();
       return true;
     }
+
     return false;
   }
 
   sizeControlChangeHadler(): void {
     this.gameSize = Number(this.sizeControl.selectedOptions[0].value);
     this.isLoadEnable = tools.getFromStorage(`${SAVED_GAME_KEY}_${this.gameSize}`) !== null;
+
     if (this.isLoadEnable) {
       this.loadButton.removeAttribute('disabled');
     } else {
       this.loadButton.setAttribute('disabled', '');
     }
+
     this.startNewGame();
   }
 
   modeControlChangeHadler(): void {
     this.gameMode = this.modeControl.selectedOptions[0].value === 'numbers' ? 'numbers' : 'images'; // TODO refactor this ugly construction
     this.isLoadEnable = tools.getFromStorage(`${SAVED_GAME_KEY}_${this.gameSize}`) !== null;
+
     if (this.isLoadEnable) {
       this.loadButton.removeAttribute('disabled');
     } else {
       this.loadButton.setAttribute('disabled', '');
     }
+
     this.startNewGame();
   }
 
@@ -398,9 +415,11 @@ export default class GameField {
           offsetProperty: 'offsetTop',
           tilesDimansion: 'row',
         };
+
     const shiftValue = isHorizontal
       ? event.clientX - cell.div.getBoundingClientRect().left
       : event.clientY - cell.div.getBoundingClientRect().top;
+
     const fieldOffset = this.field.getBoundingClientRect()[moveParams.positionProperty];
 
     const fromEdge = Math.min(cell[moveParams.tilesDimansion], this.emptyCell[moveParams.tilesDimansion]) * CELL_SIZE;

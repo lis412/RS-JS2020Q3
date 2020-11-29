@@ -1,0 +1,142 @@
+.popup {
+	z-index: 3;
+	position: fixed;
+	width: 900px;
+	height: 500px;
+	top: 190px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	z-index: 3;
+	border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  
+  .img {
+    min-width: 500px;
+    height: 500px;
+    border-radius: 9px;
+  }
+
+  .popup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    justify-content: center;
+    padding: 50px 10px;
+
+    .message-title {
+      font-family: Georgia;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 35px;
+      line-height: 130%;
+      letter-spacing: 0.06em;
+    
+      color: #000000;
+    }
+
+    .type {
+      font-family: Georgia;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 20px;
+      line-height: 115%;
+      /* identical to box height, or 23px */
+    
+      letter-spacing: 0.06em;
+    
+      color: #000000;
+    }
+
+    .message-text {
+      font-family: Georgia;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 15px;
+      line-height: 110%;
+      /* or 17px */
+    
+      letter-spacing: 0.06em;
+    
+      color: #000000;
+    }
+
+    & ul {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      list-style: none;
+      font-family: Georgia;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 15px;
+      line-height: 110%;
+      /* identical to box height, or 17px */
+    
+      letter-spacing: 0.06em;
+    
+      color: #000000;
+    }
+    & li::before {
+      content: "•  ";
+      color: #f1cdb3;
+    }
+  }
+
+  .message-button {
+    margin: 15px;
+  }
+
+  @include respond-to ("medium") {
+
+    max-width: 630px;
+		height: auto;
+    
+    .popup {
+      max-width: 630px;
+      height: 350px;
+    }
+    .popup-info {
+      gap: 20px;
+    }
+    .desc {
+      font-size: 13px;
+    }
+    .img {
+      min-width: 350px;
+      height: 350px;
+    }
+  }
+
+  @include respond-to ("small") {
+    width: 240px;
+    height: auto;
+    
+    .img {
+      display: none;
+    }
+  }
+}
+
+.cross {
+	position: absolute;
+	width: 52px;
+	height: 52px;
+	border: 2px solid #f1cdb3;
+	box-sizing: border-box;
+	border-radius: 100px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	right: -52px;
+  top: -52px;
+  
+  &-overlay {
+    background: #f1cdb3;
+  }
+
+  &:hover {
+    background: #f1cdb3;
+  }
+}
