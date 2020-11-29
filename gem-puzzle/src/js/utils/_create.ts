@@ -10,7 +10,7 @@ export default function create(
   el: string,
   classNames: string,
   child?: HTMLElement | string | Array<HTMLElement> | null,
-  parent?: HTMLElement,
+  parent?: HTMLElement | null,
   dataAttr?: string[][],
 ): HTMLElement {
   let element: HTMLElement;
@@ -35,14 +35,14 @@ export default function create(
   }
 
   if (dataAttr?.length) {
-    dataAttr.forEach(([attrName, attrValue]) => {
-      if (attrValue === '') {
-        element.setAttribute(attrName, '');
-      }
-      if (attrName.match(/value|id|placeholder|cols|rows|autocorrect|spellcheck/)) {
-        element.setAttribute(attrName, attrValue);
-      } else {
-        element.dataset[attrName] = attrValue;
+    dataAttr.forEach((rec) => {
+      const [attrName, attrValue] = rec;
+      if (rec.length) {
+        if (attrName.match(/value|id|placeholder|cols|rows|autocorrect|selected|disabled|width|height/)) {
+          element.setAttribute(attrName, attrValue);
+        } else {
+          element.dataset[attrName] = attrValue;
+        }
       }
     });
   }
