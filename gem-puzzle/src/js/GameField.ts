@@ -5,7 +5,8 @@ import Solver from './solver/Solver';
 import Timer from './Timer';
 import { exch, solvable } from './tools';
 import * as tools from './utils/index';
-import gameImage from '../assets/images/img1.png';
+import gameImage from '../assets/images/img2.png';
+import { MoveParams } from './types';
 
 const main = tools.create('main', '', [tools.create('h1', 'title', 'Puzzle game')]);
 
@@ -47,6 +48,7 @@ export default class GameField {
     tools.create('button', 'btn', 'Start new game', main).addEventListener('click', () => {
       this.startNewGame();
     });
+    // TODO combine pause/continue buttons
     tools.create('button', 'btn', 'Pause', main).addEventListener('click', () => {
       this.timer.stop();
     });
@@ -140,7 +142,15 @@ export default class GameField {
           const cell = new Cell(cellValue, row, col);
 
           cell.div.addEventListener('click', () => {
-            this.cellClickHandler(cell);
+            if (!cell.isMoving) {
+              this.cellClickHandler(cell);
+            } else {
+              cell.isMoving = false;
+            }
+          });
+
+          cell.div.addEventListener('mousedown', (event) => {
+            this.onCellMouseDownHandlers(event, cell);
           });
 
           this.cells.push(cell);
@@ -154,7 +164,7 @@ export default class GameField {
   }
 
   cellClickHandler(cell?: Cell): void {
-    cell?.swapWithEmpty(this.emptyCell, () => {
+    if (cell?.swapWithEmpty(this.emptyCell)) {
       this.stepCount += 1;
       this.stepField.innerHTML = `${this.stepCount}`;
 
@@ -163,7 +173,7 @@ export default class GameField {
         setTimeout(this.showResults.bind(this), 500);
         // this.showResults();
       }
-    });
+    }
   }
 
   checkWin(): boolean {
@@ -232,7 +242,7 @@ export default class GameField {
         }
       }
     }
-    if (!solvable(numbers)) {
+    if (!solvable(result)) {
       if (empty.row === 0) {
         exch(result, 1, 0, 1, 1);
       } else {
@@ -351,8 +361,8 @@ export default class GameField {
           const sourceHeight = originalPartHeight;
           const destWidth = CELL_SIZE;
           const destHeight = CELL_SIZE;
-          const destX = 0; // canvas.width / 2 - destWidth / 2;
-          const destY = 0; // canvas.height / 2 - destHeight / 2;
+          const destX = 0;
+          const destY = 0;
 
           context?.drawImage(
             imageObj,
@@ -368,9 +378,62 @@ export default class GameField {
         }
       });
     };
-    // imageObj.style.objectFit = 'cover';
-    // imageObj.height = 360;
-    // imageObj.width = 360;
-    imageObj.src = gameImage; // '../assets/images/dog1.png';
+    imageObj.src = gameImage;
+  }
+
+  onCellMouseDownHandlers(event: MouseEvent, cell: Cell): void {
+    if (!cell.canMove(this.emptyCell)) return;
+
+    event.preventDefault(); // предотвратить запуск выделения (действие браузера)
+    const isHorizontal = cell.row === this.emptyCell.row;
+
+    const moveParams: MoveParams = isHorizontal
+      ? {
+          positionProperty: 'left',
+          offsetProperty: 'offsetLeft',
+          tilesDimansion: 'col',
+        }
+      : {
+          positionProperty: 'top',
+          offsetProperty: 'offsetTop',
+          tilesDimansion: 'row',
+        };
+    const shiftValue = isHorizontal
+      ? event.clientX - cell.div.getBoundingClientRect().left
+      : event.clientY - cell.div.getBoundingClientRect().top;
+    const fieldOffset = this.field.getBoundingClientRect()[moveParams.positionProperty];
+
+    const fromEdge = Math.min(cell[moveParams.tilesDimansion], this.emptyCell[moveParams.tilesDimansion]) * CELL_SIZE;
+    const toEdge = Math.max(cell[moveParams.tilesDimansion], this.emptyCell[moveParams.tilesDimansion]) * CELL_SIZE;
+
+    function onMouseMove(moveEvent: MouseEvent) {
+      cell.isMoving = true;
+      cell.div.classList.add('notransition');
+
+      let newCoordinate = (isHorizontal ? moveEvent.clientX : moveEvent.clientY) - shiftValue - fieldOffset;
+
+      if (newCoordinate < fromEdge) {
+        newCoordinate = fromEdge;
+      }
+      if (newCoordinate > toEdge) {
+        newCoordinate = toEdge;
+      }
+
+      cell.div.style[moveParams.positionProperty] = `${newCoordinate}px`;
+    }
+
+    function onMouseUp() {
+      cell.div.classList.remove('notransition');
+      if (Math.abs(cell.div[moveParams.offsetProperty] - cell[moveParams.tilesDimansion] * CELL_SIZE) > CELL_SIZE / 2) {
+        cell.isMoving = false;
+      } else {
+        cell.updatePosition();
+      }
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousemove', onMouseMove);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 }

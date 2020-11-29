@@ -11,6 +11,7 @@ export default class Cell {
   col: number;
   row: number;
   div: HTMLDivElement;
+  isMoving = false;
 
   constructor(num: number, row: number, col: number) {
     this.num = num;
@@ -34,14 +35,14 @@ export default class Cell {
     this.div.style.top = `${this.row * CELL_SIZE}px`;
   }
 
-  swapWithEmpty(emptyCell: EmptyCell, callback: () => void): void {
-    if (!this.canMove(emptyCell)) return;
+  swapWithEmpty(emptyCell: EmptyCell): boolean {
+    if (!this.canMove(emptyCell)) return false;
 
     [this.col, this.row, emptyCell.col, emptyCell.row] = [emptyCell.col, emptyCell.row, this.col, this.row];
 
     this.updatePosition();
 
-    if (callback) callback();
+    return true;
   }
 
   canMove(emptyCell: EmptyCell): boolean {
